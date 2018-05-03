@@ -2,7 +2,7 @@
 #set -x
 
 TOOL_NAME="Microsoft Office 2016 Keychain Removal Tool"
-TOOL_VERSION="2.2"
+TOOL_VERSION="2.25"
 
 ## Copyright (c) 2018 Microsoft Corp. All rights reserved.
 ## Scripts are not supported under any Microsoft standard support program or service. The scripts are provided AS IS without warranty of any kind.
@@ -20,6 +20,9 @@ EXCEL2016PATH="/Applications/Microsoft Excel.app"
 POWERPOINT2016PATH="/Applications/Microsoft PowerPoint.app"
 OUTLOOK2016PATH="/Applications/Microsoft Outlook.app"
 ONENOTE2016PATH="/Applications/Microsoft OneNote.app"
+SKYPEBIZPATH="/Applications/Skype for Business.app"
+ONEDRIVEPATH="/Applications/OneDrive.app"
+TEAMSPATH="/Applications/Microsoft Teams.app"
 SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
 
 function ShowUsage {
@@ -28,6 +31,7 @@ function ShowUsage {
 	echo "Purpose: Removes Office 2016 for Mac keychain entries for 15.x and 16.x builds"
 	echo "Usage: NukeOffKey [--Default] [--IRM] [--All] [--Force]"
 	echo "         [--Default] removes the logon, cache and ADAL keychain entries"
+	echo "         [--Other] removes the Other Products (Skype, OneDrive and Teams) keychain entries"	
 	echo "         [--IRM] removes the rights management keychain entries"
 	echo "         [--All] removes logon, cache, ADAL, rights management and HelpShift keychain entries"
 	echo
@@ -55,6 +59,18 @@ function CheckRunning {
 	fi
 	ONENOTERUNSTATE=$(CheckLaunchState "$ONENOTE2016PATH")
 	if [ "$ONENOTERUNSTATE" == "1" ]; then
+		OPENAPPS=$(($OPENAPPS + 1))
+	fi
+	SKYPEBIZRUNSTATE=$(CheckLaunchState "$SKYPEBIZPATH")
+	if [ "$SKYPEBIZRUNSTATE" == "1" ]; then
+		OPENAPPS=$(($OPENAPPS + 1))
+	fi
+	ONEDRIVERUNSTATE=$(CheckLaunchState "$ONEDRIVEPATH")
+	if [ "$ONEDRIVERUNSTATE" == "1" ]; then
+		OPENAPPS=$(($OPENAPPS + 1))
+	fi
+	TEAMSRUNSTATE=$(CheckLaunchState "$TEAMSPATH")
+	if [ "$TEAMSRUNSTATE" == "1" ]; then
 		OPENAPPS=$(($OPENAPPS + 1))
 	fi
 	if [ "$OPENAPPS" != "0" ]; then
@@ -100,6 +116,9 @@ function ForceQuit2016 {
 	ForceTerminate "$POWERPOINT2016PATH"
 	ForceTerminate "$OUTLOOK2016PATH"
 	ForceTerminate "$ONENOTE2016PATH"
+	ForceTerminate "$SKYPEBIZPATH"
+	ForceTerminate "$ONEDRIVEPATH"
+	ForceTerminate "$TEAMSPATH"
 }
 
 # Checks to see if 'msoCredentialSchemeADAL' entries are present in the keychain
@@ -251,6 +270,83 @@ function RemoveEntryExchange {
 	/usr/bin/security delete-generic-password -l 'Exchange' 2> /dev/null 1> /dev/null
 }
 
+# Checks to see if the 'Skype for Business' entry is present in the keychain
+function FindEntrySkypeBiz {
+	/usr/bin/security find-generic-password -l 'Skype for Business' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'Skype for Business' entry from the keychain
+function RemoveEntrySkypeBiz {
+	/usr/bin/security delete-generic-password -l 'Skype for Business' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'Microsoft Teams Identities Cache' entry is present in the keychain
+function FindEntryTeamsIdCache {
+	/usr/bin/security find-generic-password -l 'Microsoft Teams Identities Cache' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'Microsoft Teams Identities Cache' entry from the keychain
+function RemoveEntryTeamsIdCache {
+	/usr/bin/security delete-generic-password -l 'Microsoft Teams Identities Cache' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'OneDrive Standalone Cached Credential Business - Business1' entry is present in the keychain
+function FindEntryOneDriveCred {
+	/usr/bin/security find-generic-password -l 'OneDrive Standalone Cached Credential Business - Business1' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'OneDrive Standalone Cached Credential Business - Business1' entry from the keychain
+function RemoveEntryOneDriveCred {
+	/usr/bin/security delete-generic-password -l 'OneDrive Standalone Cached Credential Business - Business1' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'com.microsoft.OneDrive.FinderSync.HockeySDK' entry is present in the keychain
+function FindEntryOneDriveFSHockey {
+	/usr/bin/security find-generic-password -l 'com.microsoft.OneDrive.FinderSync.HockeySDK' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'com.microsoft.OneDrive.FinderSync.HockeySDK' entry from the keychain
+function RemoveEntryOneDriveFSHockey {
+	/usr/bin/security delete-generic-password -l 'com.microsoft.OneDrive.FinderSync.HockeySDK' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'com.microsoft.OneDrive.HockeySDK' entry is present in the keychain
+function FindEntryOneDriveHockey {
+	/usr/bin/security find-generic-password -l 'com.microsoft.OneDrive.HockeySDK' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'com.microsoft.OneDrive.HockeySDK' entry from the keychain
+function RemoveEntryOneDriveHockey {
+	/usr/bin/security delete-generic-password -l 'com.microsoft.OneDrive.HockeySDK' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'com.microsoft.SkypeForBusiness.HockeySDK' entry is present in the keychain
+function FindEntrySkypeBizHockey {
+	/usr/bin/security find-generic-password -l 'com.microsoft.SkypeForBusiness.HockeySDK' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'com.microsoft.SkypeForBusiness.HockeySDK' entry from the keychain
+function RemoveEntrySkypeBizHockey {
+	/usr/bin/security delete-generic-password -l 'com.microsoft.SkypeForBusiness.HockeySDK' 2> /dev/null 1> /dev/null
+}
+
+# Checks to see if the 'com.microsoft.teams.HockeySDK' entry is present in the keychain
+function FindEntryTeamsHockey {
+	/usr/bin/security find-generic-password -l 'com.microsoft.teams.HockeySDK' 2> /dev/null 1> /dev/null
+	echo $?
+}
+
+# Removes the 'com.microsoft.teams.HockeySDK' entry from the keychain
+function RemoveEntryTeamsHockey {
+	/usr/bin/security delete-generic-password -l 'com.microsoft.teams.HockeySDK' 2> /dev/null 1> /dev/null
+}
+
 # Evaluate command-line arguments
 if [[ $# = 0 ]]; then
 	ShowUsage
@@ -264,6 +360,10 @@ else
     	;;
     	--Default|-d|--default)
     	REMOVEDEFAULT=true
+    	shift # past argument
+		;;
+    	--OTHER|-o|--other)
+    	REMOVEOTHER=true
     	shift # past argument
 		;;
     	--IRM|-i|--irm)
@@ -391,6 +491,72 @@ if [ $REMOVEDEFAULT ] || [ $REMOVEALL ]; then
 	done
 
 	echo "Default keychain entries removed"
+fi
+
+if [ $REMOVEOTHER ] || [ $REMOVEALL ]; then	
+	# Find and remove 'Skype for Business' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntrySkypeBiz)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntrySkypeBiz
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntrySkypeBiz)
+	done
+
+	# Find and remove 'Microsoft Teams Identities Cache' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntryTeamsIdCache)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntryTeamsIdCache
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntryTeamsIdCache)
+	done
+
+	# Find and remove 'OneDrive Standalone Cached Credential Business - Business1' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntryOneDriveCred)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntryOneDriveCred
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntryOneDriveCred)
+	done
+
+	# Find and remove 'com.microsoft.OneDrive.FinderSync.HockeySDK' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntryOneDriveFSHockey)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntryOneDriveFSHockey
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntryOneDriveFSHockey)
+	done
+
+	# Find and remove 'com.microsoft.OneDrive.HockeySDK' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntryOneDriveHockey)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntryOneDriveHockey
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntryOneDriveHockey)
+	done
+
+	# Find and remove 'com.microsoft.SkypeForBusiness.HockeySDK' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntrySkypeBizHockey)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntrySkypeBizHockey
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntrySkypeBizHockey)
+	done
+
+	# Find and remove 'com.microsoft.teams.HockeySDK' entries
+	MAXCOUNT=0
+	KEYNOTPRESENT=$(FindEntryTeamsHockey)
+	while [ "$KEYNOTPRESENT" == "0" ] || [ $MAXCOUNT -gt 20 ]; do
+		RemoveEntryTeamsHockey
+		let MAXCOUNT=MAXCOUNT+1
+		KEYNOTPRESENT=$(FindEntryTeamsHockey)
+	done
+	echo "Other Products keychain entries removed"
 fi
 
 if [ $REMOVEIRM ] || [ $REMOVEALL ]; then	
