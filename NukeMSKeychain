@@ -2,7 +2,13 @@
 #set -x
 
 TOOL_NAME="Microsoft Office 2016 Keychain Removal Tool"
-TOOL_VERSION="2.25"
+TOOL_VERSION="2.25 AUTO"
+
+#begin - modified to run automatically
+#also added line 358 and commented line 359
+REMOVEALL=true
+FORCE=true
+#end - modified
 
 ## Copyright (c) 2018 Microsoft Corp. All rights reserved.
 ## Scripts are not supported under any Microsoft standard support program or service. The scripts are provided AS IS without warranty of any kind.
@@ -349,7 +355,8 @@ function RemoveEntryTeamsHockey {
 
 # Evaluate command-line arguments
 if [[ $# = 0 ]]; then
-	ShowUsage
+	echo
+	#ShowUsage
 else
 	for KEY in "$@"
 	do
